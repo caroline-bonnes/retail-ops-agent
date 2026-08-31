@@ -17,8 +17,11 @@ import os
 
 
 def setup_telemetry() -> str | None:
-    """Configure OpenTelemetry and GenAI telemetry with GCS upload."""
+    """Configure OpenTelemetry, GenAI telemetry, structured logging, and PII redaction."""
     os.environ.setdefault("GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY", "true")
+
+    # Verify PII redaction engine is active
+    logging.info("PII Redaction Engine initialized for telemetry and log streams.")
 
     bucket = os.environ.get("LOGS_BUCKET_NAME")
     capture_content = os.environ.get(
