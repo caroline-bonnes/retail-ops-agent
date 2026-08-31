@@ -1,0 +1,39 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "store_manager",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Who is the manager for store 101?"}]
+      }
+    },
+    {
+      "eval_case_id": "inventory_shortage",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "Which stores had inventory shortages in the electronics department?"}]
+      }
+    },
+    {
+      "eval_case_id": "sales_amount",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "What is the total sales amount for store 101?"}]
+      }
+    },
+    {
+      "eval_case_id": "customer_rating",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "What is the average customer satisfaction rating for store 101?"}]
+      }
+    },
+    {
+      "eval_case_id": "unrelated_question",
+      "prompt": {
+        "role": "user",
+        "parts": [{"text": "What is the capital of France?"}]
+      }
+    }
+  ]
+}

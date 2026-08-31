@@ -1,0 +1,1193 @@
+{
+  "eval_cases": [
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "Who is the manager for store 101?"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "The manager for store 101 is Alice Smith."
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "store_manager",
+      "agent_data": {
+        "agents": {
+          "retail_ops_agent": {
+            "agent_id": "retail_ops_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a retail operations assistant. You help answer natural language questions about store performance, inventory levels, sales metrics, and manager details by using the Conversational Analytics Data Agent toolset. If the user asks about stores, sales, inventory, or customer satisfaction, use the ask_data_agent tool with data_agent_name='projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent'. Always provide clear, summary answers based on the retrieved data. Keep answers factual and precise.",
+            "tools": [
+              {
+                "function_declarations": [
+                  {
+                    "description": "Lists accessible data agents in a project.\n\nArgs:\n    project_id: The project to list agents in.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and a list of data agents with their\n    detailed information, including name, display_name, description (if\n    available), create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> list_accessible_data_agents(\n    ...     project_id=\"my-gcp-project\",\n    ...     credentials=credentials,\n    ... )\n    {\n      \"status\": \"SUCCESS\",\n      \"response\": [\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent1\",\n          \"displayName\": \"My Test Agent\",\n          \"createTime\": \"2025-10-01T22:44:22.473927629Z\",\n          \"updateTime\": \"2025-10-01T22:44:23.094541325Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"my-project\",\n                    \"datasetId\": \"dataset1\",\n                    \"tableId\": \"table1\"\n                  }]\n                }\n              }]\n            }\n          }\n        },\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent2\",\n          \"displayName\": \"\",\n          \"description\": \"Description for Agent 2.\",\n          \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n          \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"another-project\",\n                    \"datasetId\": \"dataset2\",\n                    \"tableId\": \"table2\"\n                  }]\n                }\n              }],\n              \"systemInstruction\": \"You are a helpful assistant.\",\n              \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}}\n            }\n          }\n        }\n      ]\n    }\n",
+                    "name": "list_accessible_data_agents",
+                    "parameters": {
+                      "properties": {
+                        "project_id": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "project_id"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Gets a data agent by name.\n\nArgs:\n    data_agent_name: The name of the agent to get, in format\n      projects/{project}/locations/{location}/dataAgents/{agent}.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and details of a data agent,\n    including name, display_name, description (if available),\n    create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> get_data_agent_info(\n    ...\n    data_agent_name=\"projects/my-project/locations/global/dataAgents/agent-1\",\n    ...     credentials=credentials,\n    ... )\n    {\n        \"status\": \"SUCCESS\",\n        \"response\": {\n            \"name\": \"projects/my-project/locations/global/dataAgents/agent-1\",\n            \"description\": \"Description for Agent 1.\",\n            \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n            \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n            \"dataAnalyticsAgent\": {\n                \"publishedContext\": {\n                    \"systemInstruction\": \"You are a helpful assistant.\",\n                    \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}},\n                    \"datasourceReferences\": {\n                        \"bq\": {\n                            \"tableReferences\": [{\n                                \"projectId\": \"my-gcp-project\",\n                                \"datasetId\": \"dataset1\",\n                                \"tableId\": \"table1\"\n                            }]\n                        }\n                    },\n                }\n            }\n        }\n    }\n",
+                    "name": "get_data_agent_info",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Asks a question to a data agent.\n\n  Args:\n      data_agent_name: The resource name of an existing data agent to ask, in\n        format projects/{project}/locations/{location}/dataAgents/{agent}.\n      query: The question to ask the agent.\n      credentials: The credentials to use for the request.\n      tool_context: The context for the tool.\n\n  Returns:\n      A dictionary with two keys:\n      - 'status': A string indicating the final status (e.g., \"SUCCESS\").\n      - 'response': A list of dictionaries, where each dictionary\n        represents a step in the agent's execution process and can\n        contain keys like 'text', 'data', or 'Data Retrieved' indicating\n        thought process, SQL generation, data retrieval, or final answer.\n\n  Examples:\n      A query to a data agent, showing the full return structure.\n      The original question: \"What is the average tree height in San\n      Francisco?\"\n\n      >>> ask_data_agent(\n      ...\n      data_agent_name=\"projects/my-project/locations/global/dataAgents/sf-trees-agent\",\n      ...     query=\"What is the average tree height in San Francisco?\",\n      ...     credentials=credentials,\n      ...     tool_context=tool_context,\n      ... )\n      {\n        \"status\": \"SUCCESS\",\n        \"response\": [\n          {\n            \"text\": {\n              \"parts\": [\n                \"Analyzing context\",\n                \"Retrieved context for 1 table.\"\n              ],\n              \"textType\": \"THOUGHT\"\n            }\n          },\n          {\n            \"data\": {\n              \"generatedSql\": \"SELECT\n AVG(SAFE_CAST(street_trees.dbh AS FLOAT64)) AS average_height\nFROM\n bigquery-public-data.san_francisco.street_trees AS street_trees;\"\n            }\n          },\n          {\n            \"Data Retrieved\": {\n              \"headers\": [\n                \"average_height\"\n              ],\n              \"rows\": [\n                [\n                  10.073475670972512\n                ]\n              ],\n              \"summary\": \"Showing all 1 rows.\"\n            }\n          },\n          {\n            \"text\": {\n              \"parts\": [\n                \"### Summary\nBased on the street tree data for San Francisco, the average height (recorded in the dbh column) is approximately 10.07.\"\n              ],\n              \"textType\": \"FINAL_RESPONSE\"\n            }\n          }\n        ]\n      }\n  ",
+                    "name": "ask_data_agent",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        },
+                        "query": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name",
+                        "query"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              }
+            ],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-445b2ccb-773f-44e8-af21-795d801bbfdd",
+                        "args": {
+                          "query": "Who is the manager for store 101?",
+                          "data_agent_name": "projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent"
+                        },
+                        "name": "ask_data_agent"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-445b2ccb-773f-44e8-af21-795d801bbfdd",
+                        "name": "ask_data_agent",
+                        "response": {
+                          "status": "SUCCESS",
+                          "response": [
+                            {
+                              "text": {
+                                "parts": [
+                                  "Analyzing context",
+                                  "Retrieved context for 4 tables."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Running a query",
+                                  "SELECT manager\nFROM `sandbox-466217.retail_ops.stores`\nWHERE store_id = 101"
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Query execution completed",
+                                  "Query returned 1 row in 1.73s."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "The manager for store 101 is **Alice Smith** (as retrieved from the `stores` table)."
+                                ],
+                                "textType": "FINAL_RESPONSE"
+                              }
+                            },
+                            {
+                              "data": {
+                                "query": {
+                                  "datasources": [
+                                    {
+                                      "bigqueryTableReference": {
+                                        "projectId": "sandbox-466217",
+                                        "datasetId": "retail_ops",
+                                        "tableId": "stores"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "data": {
+                                "generatedSql": "SELECT manager\nFROM `sandbox-466217.retail_ops.stores`\nWHERE store_id = 101"
+                              }
+                            },
+                            {
+                              "data": {
+                                "bigQueryJob": {
+                                  "projectId": "sandbox-466217",
+                                  "jobId": "job_LHSvNu-PESlZfI8jrMI_etuBtkHz",
+                                  "destinationTable": {
+                                    "projectId": "sandbox-466217",
+                                    "datasetId": "_62e3f1c9476506cf8370f79e6231fa6e487ab36d",
+                                    "tableId": "anonev_5C2SbErP8NO3GRPrFsK9MnXnzrzbhna5bVEZVCi_tdo"
+                                  },
+                                  "location": "US",
+                                  "schema": {}
+                                }
+                              }
+                            },
+                            {
+                              "Data Retrieved": {
+                                "headers": [
+                                  "manager"
+                                ],
+                                "rows": [
+                                  [
+                                    "Alice Smith"
+                                  ]
+                                ],
+                                "summary": "Showing all 1 rows."
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "What are the sales details for store 101?",
+                                  "Show the customer satisfaction rating for store 101."
+                                ],
+                                "textType": "FOLLOWUP_QUESTIONS"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "The manager for store 101 is Alice Smith."
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "Which stores had inventory shortages in the electronics department?"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "Based on the data, the following stores have inventory shortages in the electronics department:\n\n*   **San Francisco (Store 101)** has a shortage of **Wireless Headphones**, with 8 units in stock against a reorder point of 15.\n*   **Los Angeles (Store 103)** has a shortage of **Smart TV 55**, with 3 units in stock against a reorder point of 10.\n*   **Seattle (Store 105)** has a shortage of **Smart TV 55**, with 5 units in stock against a reorder point of 10.\n\nIt appears that \"Smart TV 55\" is facing shortages in multiple locations."
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "inventory_shortage",
+      "agent_data": {
+        "agents": {
+          "retail_ops_agent": {
+            "agent_id": "retail_ops_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a retail operations assistant. You help answer natural language questions about store performance, inventory levels, sales metrics, and manager details by using the Conversational Analytics Data Agent toolset. If the user asks about stores, sales, inventory, or customer satisfaction, use the ask_data_agent tool with data_agent_name='projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent'. Always provide clear, summary answers based on the retrieved data. Keep answers factual and precise.",
+            "tools": [
+              {
+                "function_declarations": [
+                  {
+                    "description": "Lists accessible data agents in a project.\n\nArgs:\n    project_id: The project to list agents in.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and a list of data agents with their\n    detailed information, including name, display_name, description (if\n    available), create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> list_accessible_data_agents(\n    ...     project_id=\"my-gcp-project\",\n    ...     credentials=credentials,\n    ... )\n    {\n      \"status\": \"SUCCESS\",\n      \"response\": [\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent1\",\n          \"displayName\": \"My Test Agent\",\n          \"createTime\": \"2025-10-01T22:44:22.473927629Z\",\n          \"updateTime\": \"2025-10-01T22:44:23.094541325Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"my-project\",\n                    \"datasetId\": \"dataset1\",\n                    \"tableId\": \"table1\"\n                  }]\n                }\n              }]\n            }\n          }\n        },\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent2\",\n          \"displayName\": \"\",\n          \"description\": \"Description for Agent 2.\",\n          \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n          \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"another-project\",\n                    \"datasetId\": \"dataset2\",\n                    \"tableId\": \"table2\"\n                  }]\n                }\n              }],\n              \"systemInstruction\": \"You are a helpful assistant.\",\n              \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}}\n            }\n          }\n        }\n      ]\n    }\n",
+                    "name": "list_accessible_data_agents",
+                    "parameters": {
+                      "properties": {
+                        "project_id": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "project_id"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Gets a data agent by name.\n\nArgs:\n    data_agent_name: The name of the agent to get, in format\n      projects/{project}/locations/{location}/dataAgents/{agent}.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and details of a data agent,\n    including name, display_name, description (if available),\n    create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> get_data_agent_info(\n    ...\n    data_agent_name=\"projects/my-project/locations/global/dataAgents/agent-1\",\n    ...     credentials=credentials,\n    ... )\n    {\n        \"status\": \"SUCCESS\",\n        \"response\": {\n            \"name\": \"projects/my-project/locations/global/dataAgents/agent-1\",\n            \"description\": \"Description for Agent 1.\",\n            \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n            \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n            \"dataAnalyticsAgent\": {\n                \"publishedContext\": {\n                    \"systemInstruction\": \"You are a helpful assistant.\",\n                    \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}},\n                    \"datasourceReferences\": {\n                        \"bq\": {\n                            \"tableReferences\": [{\n                                \"projectId\": \"my-gcp-project\",\n                                \"datasetId\": \"dataset1\",\n                                \"tableId\": \"table1\"\n                            }]\n                        }\n                    },\n                }\n            }\n        }\n    }\n",
+                    "name": "get_data_agent_info",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Asks a question to a data agent.\n\n  Args:\n      data_agent_name: The resource name of an existing data agent to ask, in\n        format projects/{project}/locations/{location}/dataAgents/{agent}.\n      query: The question to ask the agent.\n      credentials: The credentials to use for the request.\n      tool_context: The context for the tool.\n\n  Returns:\n      A dictionary with two keys:\n      - 'status': A string indicating the final status (e.g., \"SUCCESS\").\n      - 'response': A list of dictionaries, where each dictionary\n        represents a step in the agent's execution process and can\n        contain keys like 'text', 'data', or 'Data Retrieved' indicating\n        thought process, SQL generation, data retrieval, or final answer.\n\n  Examples:\n      A query to a data agent, showing the full return structure.\n      The original question: \"What is the average tree height in San\n      Francisco?\"\n\n      >>> ask_data_agent(\n      ...\n      data_agent_name=\"projects/my-project/locations/global/dataAgents/sf-trees-agent\",\n      ...     query=\"What is the average tree height in San Francisco?\",\n      ...     credentials=credentials,\n      ...     tool_context=tool_context,\n      ... )\n      {\n        \"status\": \"SUCCESS\",\n        \"response\": [\n          {\n            \"text\": {\n              \"parts\": [\n                \"Analyzing context\",\n                \"Retrieved context for 1 table.\"\n              ],\n              \"textType\": \"THOUGHT\"\n            }\n          },\n          {\n            \"data\": {\n              \"generatedSql\": \"SELECT\n AVG(SAFE_CAST(street_trees.dbh AS FLOAT64)) AS average_height\nFROM\n bigquery-public-data.san_francisco.street_trees AS street_trees;\"\n            }\n          },\n          {\n            \"Data Retrieved\": {\n              \"headers\": [\n                \"average_height\"\n              ],\n              \"rows\": [\n                [\n                  10.073475670972512\n                ]\n              ],\n              \"summary\": \"Showing all 1 rows.\"\n            }\n          },\n          {\n            \"text\": {\n              \"parts\": [\n                \"### Summary\nBased on the street tree data for San Francisco, the average height (recorded in the dbh column) is approximately 10.07.\"\n              ],\n              \"textType\": \"FINAL_RESPONSE\"\n            }\n          }\n        ]\n      }\n  ",
+                    "name": "ask_data_agent",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        },
+                        "query": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name",
+                        "query"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              }
+            ],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-5bab71fc-15f1-45e7-92f7-2208ef98c7a4",
+                        "args": {
+                          "query": "Which stores had inventory shortages in the electronics department?",
+                          "data_agent_name": "projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent"
+                        },
+                        "name": "ask_data_agent"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-5bab71fc-15f1-45e7-92f7-2208ef98c7a4",
+                        "name": "ask_data_agent",
+                        "response": {
+                          "status": "SUCCESS",
+                          "response": [
+                            {
+                              "text": {
+                                "parts": [
+                                  "Analyzing context",
+                                  "Retrieved context for 4 tables."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Running a query",
+                                  "SELECT stores.store_id,\n       stores.city,\n       inventory.product_name,\n       inventory.stock_count,\n       inventory.reorder_point\nFROM `sandbox-466217.retail_ops.inventory` AS inventory\nINNER JOIN `sandbox-466217.retail_ops.stores` AS stores ON inventory.store_id = stores.store_id\nWHERE LOWER(inventory.department) = 'electronics'\n  AND inventory.stock_count < inventory.reorder_point\nORDER BY stores.store_id"
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Query execution completed",
+                                  "Query returned 3 rows in 1.36s."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "I have identified the stores that currently have inventory shortages in the electronics department. \n\nAn inventory shortage is defined here as a situation where the stock count is strictly less than the reorder point. Based on this criteria, the following stores have shortages in electronics:"
+                                ],
+                                "textType": "FINAL_RESPONSE"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "I assumed that an 'inventory shortage' refers to any product where the current stock count is strictly lower than its designated reorder point."
+                                ],
+                                "textType": "FINAL_RESPONSE"
+                              }
+                            },
+                            {
+                              "data": {
+                                "query": {
+                                  "datasources": [
+                                    {
+                                      "bigqueryTableReference": {
+                                        "projectId": "sandbox-466217",
+                                        "datasetId": "retail_ops",
+                                        "tableId": "stores"
+                                      }
+                                    },
+                                    {
+                                      "bigqueryTableReference": {
+                                        "projectId": "sandbox-466217",
+                                        "datasetId": "retail_ops",
+                                        "tableId": "inventory"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "data": {
+                                "generatedSql": "SELECT stores.store_id,\n       stores.city,\n       inventory.product_name,\n       inventory.stock_count,\n       inventory.reorder_point\nFROM `sandbox-466217.retail_ops.inventory` AS inventory\nINNER JOIN `sandbox-466217.retail_ops.stores` AS stores ON inventory.store_id = stores.store_id\nWHERE LOWER(inventory.department) = 'electronics'\n  AND inventory.stock_count < inventory.reorder_point\nORDER BY stores.store_id"
+                              }
+                            },
+                            {
+                              "data": {
+                                "bigQueryJob": {
+                                  "projectId": "sandbox-466217",
+                                  "jobId": "job_MQw5sD6CwNrDdkYOBJn5gPCEGq-e",
+                                  "destinationTable": {
+                                    "projectId": "sandbox-466217",
+                                    "datasetId": "_62e3f1c9476506cf8370f79e6231fa6e487ab36d",
+                                    "tableId": "anonev_wk396PP9yTEwO4Jbc_0qIVYdPK6qjZVVT_x_MQcFLFs"
+                                  },
+                                  "location": "US",
+                                  "schema": {}
+                                }
+                              }
+                            },
+                            {
+                              "Data Retrieved": {
+                                "headers": [
+                                  "store_id",
+                                  "city",
+                                  "product_name",
+                                  "stock_count",
+                                  "reorder_point"
+                                ],
+                                "rows": [
+                                  [
+                                    101,
+                                    "San Francisco",
+                                    "Wireless Headphones",
+                                    8,
+                                    15
+                                  ],
+                                  [
+                                    103,
+                                    "Los Angeles",
+                                    "Smart TV 55",
+                                    3,
+                                    10
+                                  ],
+                                  [
+                                    105,
+                                    "Seattle",
+                                    "Smart TV 55",
+                                    5,
+                                    10
+                                  ]
+                                ],
+                                "summary": "Showing all 3 rows."
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "### Key Insights\n- **Smart TV 55** is facing shortages in multiple locations, specifically in **Los Angeles (Store 103)** and **Seattle (Store 105)**, where stock levels are at 3 and 5 respectively (both below the reorder point of 10).\n- **San Francisco (Store 101)** has a shortage of **Wireless Headphones**, with only 8 units in stock compared to a reorder point of 15."
+                                ],
+                                "textType": "FINAL_RESPONSE"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Show all inventory items for San Francisco.",
+                                  "Which store has the highest total sales?",
+                                  "List all departments and their total stock counts."
+                                ],
+                                "textType": "FOLLOWUP_QUESTIONS"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "Based on the data, the following stores have inventory shortages in the electronics department:\n\n*   **San Francisco (Store 101)** has a shortage of **Wireless Headphones**, with 8 units in stock against a reorder point of 15.\n*   **Los Angeles (Store 103)** has a shortage of **Smart TV 55**, with 3 units in stock against a reorder point of 10.\n*   **Seattle (Store 105)** has a shortage of **Smart TV 55**, with 5 units in stock against a reorder point of 10.\n\nIt appears that \"Smart TV 55\" is facing shortages in multiple locations."
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "What is the total sales amount for store 101?"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "The total sales amount for store 101 is $739.96."
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "sales_amount",
+      "agent_data": {
+        "agents": {
+          "retail_ops_agent": {
+            "agent_id": "retail_ops_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a retail operations assistant. You help answer natural language questions about store performance, inventory levels, sales metrics, and manager details by using the Conversational Analytics Data Agent toolset. If the user asks about stores, sales, inventory, or customer satisfaction, use the ask_data_agent tool with data_agent_name='projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent'. Always provide clear, summary answers based on the retrieved data. Keep answers factual and precise.",
+            "tools": [
+              {
+                "function_declarations": [
+                  {
+                    "description": "Lists accessible data agents in a project.\n\nArgs:\n    project_id: The project to list agents in.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and a list of data agents with their\n    detailed information, including name, display_name, description (if\n    available), create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> list_accessible_data_agents(\n    ...     project_id=\"my-gcp-project\",\n    ...     credentials=credentials,\n    ... )\n    {\n      \"status\": \"SUCCESS\",\n      \"response\": [\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent1\",\n          \"displayName\": \"My Test Agent\",\n          \"createTime\": \"2025-10-01T22:44:22.473927629Z\",\n          \"updateTime\": \"2025-10-01T22:44:23.094541325Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"my-project\",\n                    \"datasetId\": \"dataset1\",\n                    \"tableId\": \"table1\"\n                  }]\n                }\n              }]\n            }\n          }\n        },\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent2\",\n          \"displayName\": \"\",\n          \"description\": \"Description for Agent 2.\",\n          \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n          \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"another-project\",\n                    \"datasetId\": \"dataset2\",\n                    \"tableId\": \"table2\"\n                  }]\n                }\n              }],\n              \"systemInstruction\": \"You are a helpful assistant.\",\n              \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}}\n            }\n          }\n        }\n      ]\n    }\n",
+                    "name": "list_accessible_data_agents",
+                    "parameters": {
+                      "properties": {
+                        "project_id": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "project_id"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Gets a data agent by name.\n\nArgs:\n    data_agent_name: The name of the agent to get, in format\n      projects/{project}/locations/{location}/dataAgents/{agent}.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and details of a data agent,\n    including name, display_name, description (if available),\n    create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> get_data_agent_info(\n    ...\n    data_agent_name=\"projects/my-project/locations/global/dataAgents/agent-1\",\n    ...     credentials=credentials,\n    ... )\n    {\n        \"status\": \"SUCCESS\",\n        \"response\": {\n            \"name\": \"projects/my-project/locations/global/dataAgents/agent-1\",\n            \"description\": \"Description for Agent 1.\",\n            \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n            \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n            \"dataAnalyticsAgent\": {\n                \"publishedContext\": {\n                    \"systemInstruction\": \"You are a helpful assistant.\",\n                    \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}},\n                    \"datasourceReferences\": {\n                        \"bq\": {\n                            \"tableReferences\": [{\n                                \"projectId\": \"my-gcp-project\",\n                                \"datasetId\": \"dataset1\",\n                                \"tableId\": \"table1\"\n                            }]\n                        }\n                    },\n                }\n            }\n        }\n    }\n",
+                    "name": "get_data_agent_info",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Asks a question to a data agent.\n\n  Args:\n      data_agent_name: The resource name of an existing data agent to ask, in\n        format projects/{project}/locations/{location}/dataAgents/{agent}.\n      query: The question to ask the agent.\n      credentials: The credentials to use for the request.\n      tool_context: The context for the tool.\n\n  Returns:\n      A dictionary with two keys:\n      - 'status': A string indicating the final status (e.g., \"SUCCESS\").\n      - 'response': A list of dictionaries, where each dictionary\n        represents a step in the agent's execution process and can\n        contain keys like 'text', 'data', or 'Data Retrieved' indicating\n        thought process, SQL generation, data retrieval, or final answer.\n\n  Examples:\n      A query to a data agent, showing the full return structure.\n      The original question: \"What is the average tree height in San\n      Francisco?\"\n\n      >>> ask_data_agent(\n      ...\n      data_agent_name=\"projects/my-project/locations/global/dataAgents/sf-trees-agent\",\n      ...     query=\"What is the average tree height in San Francisco?\",\n      ...     credentials=credentials,\n      ...     tool_context=tool_context,\n      ... )\n      {\n        \"status\": \"SUCCESS\",\n        \"response\": [\n          {\n            \"text\": {\n              \"parts\": [\n                \"Analyzing context\",\n                \"Retrieved context for 1 table.\"\n              ],\n              \"textType\": \"THOUGHT\"\n            }\n          },\n          {\n            \"data\": {\n              \"generatedSql\": \"SELECT\n AVG(SAFE_CAST(street_trees.dbh AS FLOAT64)) AS average_height\nFROM\n bigquery-public-data.san_francisco.street_trees AS street_trees;\"\n            }\n          },\n          {\n            \"Data Retrieved\": {\n              \"headers\": [\n                \"average_height\"\n              ],\n              \"rows\": [\n                [\n                  10.073475670972512\n                ]\n              ],\n              \"summary\": \"Showing all 1 rows.\"\n            }\n          },\n          {\n            \"text\": {\n              \"parts\": [\n                \"### Summary\nBased on the street tree data for San Francisco, the average height (recorded in the dbh column) is approximately 10.07.\"\n              ],\n              \"textType\": \"FINAL_RESPONSE\"\n            }\n          }\n        ]\n      }\n  ",
+                    "name": "ask_data_agent",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        },
+                        "query": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name",
+                        "query"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              }
+            ],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-6a5e1972-9553-45cf-91e9-5d27fdd435f3",
+                        "args": {
+                          "query": "What is the total sales amount for store 101?",
+                          "data_agent_name": "projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent"
+                        },
+                        "name": "ask_data_agent"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-6a5e1972-9553-45cf-91e9-5d27fdd435f3",
+                        "name": "ask_data_agent",
+                        "response": {
+                          "status": "SUCCESS",
+                          "response": [
+                            {
+                              "text": {
+                                "parts": [
+                                  "Analyzing context",
+                                  "Retrieved context for 4 tables."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Running a query",
+                                  "SELECT SUM(total_amount) AS total_sales_amount\nFROM `sandbox-466217.retail_ops.sales`\nWHERE store_id = 101"
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Query execution completed",
+                                  "Query returned 1 row in 1.29s."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "The total sales amount for store 101 is $739.96."
+                                ],
+                                "textType": "FINAL_RESPONSE"
+                              }
+                            },
+                            {
+                              "data": {
+                                "query": {
+                                  "datasources": [
+                                    {
+                                      "bigqueryTableReference": {
+                                        "projectId": "sandbox-466217",
+                                        "datasetId": "retail_ops",
+                                        "tableId": "sales"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "data": {
+                                "generatedSql": "SELECT SUM(total_amount) AS total_sales_amount\nFROM `sandbox-466217.retail_ops.sales`\nWHERE store_id = 101"
+                              }
+                            },
+                            {
+                              "data": {
+                                "bigQueryJob": {
+                                  "projectId": "sandbox-466217",
+                                  "jobId": "job_YrSmsscCOZdMcTFQbPbvu6qjcEkG",
+                                  "destinationTable": {
+                                    "projectId": "sandbox-466217",
+                                    "datasetId": "_62e3f1c9476506cf8370f79e6231fa6e487ab36d",
+                                    "tableId": "anonev__p4d2EQRSb_OmomNCwYzgq0cmhn4IlSxIHpTnMcQOrU"
+                                  },
+                                  "location": "US",
+                                  "schema": {}
+                                }
+                              }
+                            },
+                            {
+                              "Data Retrieved": {
+                                "headers": [
+                                  "total_sales_amount"
+                                ],
+                                "rows": [
+                                  [
+                                    739.96
+                                  ]
+                                ],
+                                "summary": "Showing all 1 rows."
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "What are the total sales for each store?",
+                                  "Which products were sold at store 101?",
+                                  "What is the average customer satisfaction rating for store 101?"
+                                ],
+                                "textType": "FOLLOWUP_QUESTIONS"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "The total sales amount for store 101 is $739.96."
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "What is the average customer satisfaction rating for store 101?"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "The average customer satisfaction rating for store 101 is **4.7** out of 5."
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "customer_rating",
+      "agent_data": {
+        "agents": {
+          "retail_ops_agent": {
+            "agent_id": "retail_ops_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a retail operations assistant. You help answer natural language questions about store performance, inventory levels, sales metrics, and manager details by using the Conversational Analytics Data Agent toolset. If the user asks about stores, sales, inventory, or customer satisfaction, use the ask_data_agent tool with data_agent_name='projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent'. Always provide clear, summary answers based on the retrieved data. Keep answers factual and precise.",
+            "tools": [
+              {
+                "function_declarations": [
+                  {
+                    "description": "Lists accessible data agents in a project.\n\nArgs:\n    project_id: The project to list agents in.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and a list of data agents with their\n    detailed information, including name, display_name, description (if\n    available), create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> list_accessible_data_agents(\n    ...     project_id=\"my-gcp-project\",\n    ...     credentials=credentials,\n    ... )\n    {\n      \"status\": \"SUCCESS\",\n      \"response\": [\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent1\",\n          \"displayName\": \"My Test Agent\",\n          \"createTime\": \"2025-10-01T22:44:22.473927629Z\",\n          \"updateTime\": \"2025-10-01T22:44:23.094541325Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"my-project\",\n                    \"datasetId\": \"dataset1\",\n                    \"tableId\": \"table1\"\n                  }]\n                }\n              }]\n            }\n          }\n        },\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent2\",\n          \"displayName\": \"\",\n          \"description\": \"Description for Agent 2.\",\n          \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n          \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"another-project\",\n                    \"datasetId\": \"dataset2\",\n                    \"tableId\": \"table2\"\n                  }]\n                }\n              }],\n              \"systemInstruction\": \"You are a helpful assistant.\",\n              \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}}\n            }\n          }\n        }\n      ]\n    }\n",
+                    "name": "list_accessible_data_agents",
+                    "parameters": {
+                      "properties": {
+                        "project_id": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "project_id"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Gets a data agent by name.\n\nArgs:\n    data_agent_name: The name of the agent to get, in format\n      projects/{project}/locations/{location}/dataAgents/{agent}.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and details of a data agent,\n    including name, display_name, description (if available),\n    create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> get_data_agent_info(\n    ...\n    data_agent_name=\"projects/my-project/locations/global/dataAgents/agent-1\",\n    ...     credentials=credentials,\n    ... )\n    {\n        \"status\": \"SUCCESS\",\n        \"response\": {\n            \"name\": \"projects/my-project/locations/global/dataAgents/agent-1\",\n            \"description\": \"Description for Agent 1.\",\n            \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n            \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n            \"dataAnalyticsAgent\": {\n                \"publishedContext\": {\n                    \"systemInstruction\": \"You are a helpful assistant.\",\n                    \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}},\n                    \"datasourceReferences\": {\n                        \"bq\": {\n                            \"tableReferences\": [{\n                                \"projectId\": \"my-gcp-project\",\n                                \"datasetId\": \"dataset1\",\n                                \"tableId\": \"table1\"\n                            }]\n                        }\n                    },\n                }\n            }\n        }\n    }\n",
+                    "name": "get_data_agent_info",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Asks a question to a data agent.\n\n  Args:\n      data_agent_name: The resource name of an existing data agent to ask, in\n        format projects/{project}/locations/{location}/dataAgents/{agent}.\n      query: The question to ask the agent.\n      credentials: The credentials to use for the request.\n      tool_context: The context for the tool.\n\n  Returns:\n      A dictionary with two keys:\n      - 'status': A string indicating the final status (e.g., \"SUCCESS\").\n      - 'response': A list of dictionaries, where each dictionary\n        represents a step in the agent's execution process and can\n        contain keys like 'text', 'data', or 'Data Retrieved' indicating\n        thought process, SQL generation, data retrieval, or final answer.\n\n  Examples:\n      A query to a data agent, showing the full return structure.\n      The original question: \"What is the average tree height in San\n      Francisco?\"\n\n      >>> ask_data_agent(\n      ...\n      data_agent_name=\"projects/my-project/locations/global/dataAgents/sf-trees-agent\",\n      ...     query=\"What is the average tree height in San Francisco?\",\n      ...     credentials=credentials,\n      ...     tool_context=tool_context,\n      ... )\n      {\n        \"status\": \"SUCCESS\",\n        \"response\": [\n          {\n            \"text\": {\n              \"parts\": [\n                \"Analyzing context\",\n                \"Retrieved context for 1 table.\"\n              ],\n              \"textType\": \"THOUGHT\"\n            }\n          },\n          {\n            \"data\": {\n              \"generatedSql\": \"SELECT\n AVG(SAFE_CAST(street_trees.dbh AS FLOAT64)) AS average_height\nFROM\n bigquery-public-data.san_francisco.street_trees AS street_trees;\"\n            }\n          },\n          {\n            \"Data Retrieved\": {\n              \"headers\": [\n                \"average_height\"\n              ],\n              \"rows\": [\n                [\n                  10.073475670972512\n                ]\n              ],\n              \"summary\": \"Showing all 1 rows.\"\n            }\n          },\n          {\n            \"text\": {\n              \"parts\": [\n                \"### Summary\nBased on the street tree data for San Francisco, the average height (recorded in the dbh column) is approximately 10.07.\"\n              ],\n              \"textType\": \"FINAL_RESPONSE\"\n            }\n          }\n        ]\n      }\n  ",
+                    "name": "ask_data_agent",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        },
+                        "query": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name",
+                        "query"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              }
+            ],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-fae61e94-fac2-4744-a0b8-4da7869f52e8",
+                        "args": {
+                          "data_agent_name": "projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent",
+                          "query": "What is the average customer satisfaction rating for store 101?"
+                        },
+                        "name": "ask_data_agent"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-fae61e94-fac2-4744-a0b8-4da7869f52e8",
+                        "name": "ask_data_agent",
+                        "response": {
+                          "status": "SUCCESS",
+                          "response": [
+                            {
+                              "text": {
+                                "parts": [
+                                  "Analyzing context",
+                                  "Retrieved context for 4 tables."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Running a query",
+                                  "SELECT AVG(rating) AS avg_rating\nFROM `sandbox-466217.retail_ops.customer_satisfaction`\nWHERE store_id = 101"
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "Query execution completed",
+                                  "Query returned 1 row in 1.39s."
+                                ],
+                                "textType": "THOUGHT"
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "The average customer satisfaction rating for store 101 is **4.7** out of 5."
+                                ],
+                                "textType": "FINAL_RESPONSE"
+                              }
+                            },
+                            {
+                              "data": {
+                                "query": {
+                                  "datasources": [
+                                    {
+                                      "bigqueryTableReference": {
+                                        "projectId": "sandbox-466217",
+                                        "datasetId": "retail_ops",
+                                        "tableId": "customer_satisfaction"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "data": {
+                                "generatedSql": "SELECT AVG(rating) AS avg_rating\nFROM `sandbox-466217.retail_ops.customer_satisfaction`\nWHERE store_id = 101"
+                              }
+                            },
+                            {
+                              "data": {
+                                "bigQueryJob": {
+                                  "projectId": "sandbox-466217",
+                                  "jobId": "job_DoZnfbiAXG_GuLv65GZkPShPCZmD",
+                                  "destinationTable": {
+                                    "projectId": "sandbox-466217",
+                                    "datasetId": "_62e3f1c9476506cf8370f79e6231fa6e487ab36d",
+                                    "tableId": "anonev_HwQF922vAANYFcd2V5GOjtRX_33Hg6EZh_3P0xZUGYQ"
+                                  },
+                                  "location": "US",
+                                  "schema": {}
+                                }
+                              }
+                            },
+                            {
+                              "Data Retrieved": {
+                                "headers": [
+                                  "avg_rating"
+                                ],
+                                "rows": [
+                                  [
+                                    4.699999999999999
+                                  ]
+                                ],
+                                "summary": "Showing all 1 rows."
+                              }
+                            },
+                            {
+                              "text": {
+                                "parts": [
+                                  "What is the average customer satisfaction rating for store 102?",
+                                  "Which store has the highest average customer satisfaction rating?",
+                                  "Show me the individual customer satisfaction ratings and dates for store 101."
+                                ],
+                                "textType": "FOLLOWUP_QUESTIONS"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              },
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "The average customer satisfaction rating for store 101 is **4.7** out of 5."
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "prompt": {
+        "parts": [
+          {
+            "text": "What is the capital of France?"
+          }
+        ],
+        "role": "user"
+      },
+      "responses": [
+        {
+          "response": {
+            "parts": [
+              {
+                "text": "The capital of France is Paris."
+              }
+            ],
+            "role": "model"
+          }
+        }
+      ],
+      "eval_case_id": "unrelated_question",
+      "agent_data": {
+        "agents": {
+          "retail_ops_agent": {
+            "agent_id": "retail_ops_agent",
+            "agent_type": "LlmAgent",
+            "description": "",
+            "instruction": "You are a retail operations assistant. You help answer natural language questions about store performance, inventory levels, sales metrics, and manager details by using the Conversational Analytics Data Agent toolset. If the user asks about stores, sales, inventory, or customer satisfaction, use the ask_data_agent tool with data_agent_name='projects/sandbox-466217/locations/global/dataAgents/retail-ops-bq-agent'. Always provide clear, summary answers based on the retrieved data. Keep answers factual and precise.",
+            "tools": [
+              {
+                "function_declarations": [
+                  {
+                    "description": "Lists accessible data agents in a project.\n\nArgs:\n    project_id: The project to list agents in.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and a list of data agents with their\n    detailed information, including name, display_name, description (if\n    available), create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> list_accessible_data_agents(\n    ...     project_id=\"my-gcp-project\",\n    ...     credentials=credentials,\n    ... )\n    {\n      \"status\": \"SUCCESS\",\n      \"response\": [\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent1\",\n          \"displayName\": \"My Test Agent\",\n          \"createTime\": \"2025-10-01T22:44:22.473927629Z\",\n          \"updateTime\": \"2025-10-01T22:44:23.094541325Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"my-project\",\n                    \"datasetId\": \"dataset1\",\n                    \"tableId\": \"table1\"\n                  }]\n                }\n              }]\n            }\n          }\n        },\n        {\n          \"name\": \"projects/my-project/locations/global/dataAgents/agent2\",\n          \"displayName\": \"\",\n          \"description\": \"Description for Agent 2.\",\n          \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n          \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n          \"dataAnalyticsAgent\": {\n            \"publishedContext\": {\n              \"datasourceReferences\": [{\n                \"bq\": {\n                  \"tableReferences\": [{\n                    \"projectId\": \"another-project\",\n                    \"datasetId\": \"dataset2\",\n                    \"tableId\": \"table2\"\n                  }]\n                }\n              }],\n              \"systemInstruction\": \"You are a helpful assistant.\",\n              \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}}\n            }\n          }\n        }\n      ]\n    }\n",
+                    "name": "list_accessible_data_agents",
+                    "parameters": {
+                      "properties": {
+                        "project_id": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "project_id"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Gets a data agent by name.\n\nArgs:\n    data_agent_name: The name of the agent to get, in format\n      projects/{project}/locations/{location}/dataAgents/{agent}.\n    credentials: The credentials to use for the request.\n\nReturns:\n    A dictionary containing the status and details of a data agent,\n    including name, display_name, description (if available),\n    create_time, update_time, and data_analytics_agent context,\n    or error details if the request fails.\n\nExamples:\n    >>> get_data_agent_info(\n    ...\n    data_agent_name=\"projects/my-project/locations/global/dataAgents/agent-1\",\n    ...     credentials=credentials,\n    ... )\n    {\n        \"status\": \"SUCCESS\",\n        \"response\": {\n            \"name\": \"projects/my-project/locations/global/dataAgents/agent-1\",\n            \"description\": \"Description for Agent 1.\",\n            \"createTime\": \"2025-06-23T20:23:48.650597312Z\",\n            \"updateTime\": \"2025-06-23T20:23:49.437095391Z\",\n            \"dataAnalyticsAgent\": {\n                \"publishedContext\": {\n                    \"systemInstruction\": \"You are a helpful assistant.\",\n                    \"options\": {\"analysis\": {\"python\": {\"enabled\": True}}},\n                    \"datasourceReferences\": {\n                        \"bq\": {\n                            \"tableReferences\": [{\n                                \"projectId\": \"my-gcp-project\",\n                                \"datasetId\": \"dataset1\",\n                                \"tableId\": \"table1\"\n                            }]\n                        }\n                    },\n                }\n            }\n        }\n    }\n",
+                    "name": "get_data_agent_info",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              },
+              {
+                "function_declarations": [
+                  {
+                    "description": "Asks a question to a data agent.\n\n  Args:\n      data_agent_name: The resource name of an existing data agent to ask, in\n        format projects/{project}/locations/{location}/dataAgents/{agent}.\n      query: The question to ask the agent.\n      credentials: The credentials to use for the request.\n      tool_context: The context for the tool.\n\n  Returns:\n      A dictionary with two keys:\n      - 'status': A string indicating the final status (e.g., \"SUCCESS\").\n      - 'response': A list of dictionaries, where each dictionary\n        represents a step in the agent's execution process and can\n        contain keys like 'text', 'data', or 'Data Retrieved' indicating\n        thought process, SQL generation, data retrieval, or final answer.\n\n  Examples:\n      A query to a data agent, showing the full return structure.\n      The original question: \"What is the average tree height in San\n      Francisco?\"\n\n      >>> ask_data_agent(\n      ...\n      data_agent_name=\"projects/my-project/locations/global/dataAgents/sf-trees-agent\",\n      ...     query=\"What is the average tree height in San Francisco?\",\n      ...     credentials=credentials,\n      ...     tool_context=tool_context,\n      ... )\n      {\n        \"status\": \"SUCCESS\",\n        \"response\": [\n          {\n            \"text\": {\n              \"parts\": [\n                \"Analyzing context\",\n                \"Retrieved context for 1 table.\"\n              ],\n              \"textType\": \"THOUGHT\"\n            }\n          },\n          {\n            \"data\": {\n              \"generatedSql\": \"SELECT\n AVG(SAFE_CAST(street_trees.dbh AS FLOAT64)) AS average_height\nFROM\n bigquery-public-data.san_francisco.street_trees AS street_trees;\"\n            }\n          },\n          {\n            \"Data Retrieved\": {\n              \"headers\": [\n                \"average_height\"\n              ],\n              \"rows\": [\n                [\n                  10.073475670972512\n                ]\n              ],\n              \"summary\": \"Showing all 1 rows.\"\n            }\n          },\n          {\n            \"text\": {\n              \"parts\": [\n                \"### Summary\nBased on the street tree data for San Francisco, the average height (recorded in the dbh column) is approximately 10.07.\"\n              ],\n              \"textType\": \"FINAL_RESPONSE\"\n            }\n          }\n        ]\n      }\n  ",
+                    "name": "ask_data_agent",
+                    "parameters": {
+                      "properties": {
+                        "data_agent_name": {
+                          "type": "STRING"
+                        },
+                        "query": {
+                          "type": "STRING"
+                        }
+                      },
+                      "required": [
+                        "data_agent_name",
+                        "query"
+                      ],
+                      "type": "OBJECT"
+                    },
+                    "response": {
+                      "type": "OBJECT"
+                    }
+                  }
+                ]
+              }
+            ],
+            "sub_agents": []
+          }
+        },
+        "turns": [
+          {
+            "turn_index": 0,
+            "turn_id": "turn_0",
+            "events": [
+              {
+                "author": "retail_ops_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "text": "The capital of France is Paris."
+                    }
+                  ],
+                  "role": "model"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
